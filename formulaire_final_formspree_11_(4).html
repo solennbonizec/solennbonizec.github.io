@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Réserver une séance – Solenn Bonizec</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { min-height: 100vh; background: #faf7ff; }
+
+  .resa-wrap {
+    font-family: 'Jost', sans-serif;
+    font-weight: 400;
+    padding: 3rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .resa-label { font-size: 11px; letter-spacing: 0.35em; text-transform: uppercase; color: #7a5090; margin-bottom: 0.6rem; }
+
+  .resa-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.8rem;
+    font-weight: 500;
+    line-height: 1.1;
+    color: #1a0f2e;
+    margin-bottom: 0.4rem;
+    width: 100%;
+    max-width: 560px;
+  }
+  .resa-title em { font-style: italic; font-weight: 600; color: #c8860a; }
+
+  .resa-divider {
+    width: 50px;
+    height: 2px;
+    background: linear-gradient(to right, #e8a0c0, #d4a030);
+    margin: 1.2rem 0 2rem;
+    align-self: flex-start;
+    position: relative;
+    left: calc(50% - 280px);
+  }
+
+  @media (max-width: 620px) {
+    .resa-divider { left: 0; }
+  }
+
+  .resa-form {
+    background: #fff;
+    border: 1px solid #d4b0e8;
+    padding: 2.4rem 2rem;
+    max-width: 560px;
+    width: 100%;
+  }
+
+  .resa-field { margin-bottom: 1.8rem; }
+  .resa-field-label { font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #4a1d78; font-weight: 600; display: block; margin-bottom: 0.8rem; }
+  .resa-field-hint { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; font-style: italic; font-weight: 600; color: #1a0f2e; display: block; margin-bottom: 0.9rem; line-height: 1.5; }
+
+  .resa-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .resa-option { border: 1.5px solid #d4b0e8; padding: 1rem; cursor: pointer; text-align: center; transition: all 0.2s; background: #fdfaff; position: relative; }
+  .resa-option:hover { border-color: #d8b8e8; background: rgba(255,255,255,0.9); }
+  .resa-option.sel { border-color: #e8c46a; background: rgba(232,196,106,0.08); }
+  .resa-option.sel::after { content: '✓'; position: absolute; top: 6px; right: 8px; font-size: 11px; color: #e8c46a; }
+  .resa-option-title { font-family: 'Cormorant Garamond', serif; font-size: 1.35rem; font-style: italic; font-weight: 600; color: #1a0f2e; margin-bottom: 3px; }
+  .resa-option-sub { font-size: 13.5px; color: #4a1d78; font-weight: 600; }
+
+  .month-tabs { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
+  .month-tab { font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #4a1d78; border: 1px solid rgba(216,184,232,0.5); padding: 5px 12px; cursor: pointer; background: rgba(255,255,255,0.5); transition: all 0.2s; }
+  .month-tab.active { border-color: #e8c46a; background: rgba(232,196,106,0.08); }
+
+  .cal-wrapper { position: relative; }
+  .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; position: relative; z-index: 10; }
+  .cal-nav-btn { background: none; border: 1px solid rgba(216,184,232,0.5); width: 32px; height: 32px; cursor: pointer; color: #5a2d80; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+  .cal-nav-btn:hover { border-color: #e8c46a; background: rgba(232,196,106,0.08); }
+  .cal-month { font-family: 'Cormorant Garamond', serif; font-size: 1.45rem; font-style: italic; font-weight: 600; color: #1a0f2e; }
+
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+  .cal-day-name { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #4a1d78; text-align: center; padding: 4px 0 8px; }
+  .cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600; color: #1a0f2e; border: 1px solid transparent; position: relative; }
+  .cal-day.past { opacity: 0.2; }
+  .cal-day.dispo { cursor: pointer; border: 1px solid rgba(216,184,232,0.45); background: rgba(255,255,255,0.55); transition: all 0.2s; }
+  .cal-day.dispo:hover { border-color: #e8c46a; background: rgba(232,196,106,0.1); }
+  .cal-day.dispo::after { content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 50%; background: #e8c46a; }
+  .cal-day.sel { border-color: #c8860a !important; background: rgba(200,134,10,0.15) !important; font-weight: 700; color: #4a1d78; }
+  .cal-day.indispo { opacity: 0.15; }
+
+  .cal-overlay { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(253,248,245,0.92); backdrop-filter: blur(3px); align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 1.5rem; }
+  .cal-overlay.show { display: flex; }
+  .cal-overlay-title { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-style: italic; font-weight: 600; color: #1a0f2e; line-height: 1.6; margin-bottom: 0.8rem; }
+  .cal-overlay-sub { font-size: 0.85rem; font-weight: 500; color: #4a1d78; margin-bottom: 1rem; line-height: 1.5; }
+  .cal-overlay-link { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: #4a1d78; text-decoration: none; border-bottom: 1px solid rgba(90,45,128,0.5); padding-bottom: 2px; }
+
+  .cal-bandeau { display: none; margin-top: 0.8rem; padding: 0.9rem 1.1rem; background: rgba(232,196,106,0.07); border-left: 2px solid #e8c46a; flex-direction: column; gap: 0.6rem; }
+  .cal-bandeau.show { display: flex; }
+  .cal-bandeau-text { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-style: italic; font-weight: 600; color: #1a0f2e; line-height: 1.6; }
+  .cal-bandeau-link { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: #4a1d78; text-decoration: none; border-bottom: 1px solid rgba(122,80,144,0.3); padding-bottom: 2px; align-self: flex-start; }
+
+  .cal-legend { display: flex; gap: 1.2rem; margin-top: 1rem; padding-top: 1rem; border-top: 0.5px solid rgba(216,184,232,0.3); }
+  .cal-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; color: #1a0f2e; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .legend-dot.dispo { background: #e8c46a; }
+  .legend-dot.indispo { background: rgba(58,45,69,0.15); }
+
+  .plages-block { display: none; margin-top: 1.4rem; padding-top: 1.4rem; border-top: 0.5px solid rgba(216,184,232,0.3); }
+  .plages-block.show { display: block; }
+  .date-selected-label { font-size: 0.95rem; color: #4a1d78; font-style: italic; font-weight: 600; margin-bottom: 1rem; display: block; }
+  .resa-plages { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .resa-plage { border: 1px solid rgba(216,184,232,0.6); padding: 1rem 1.2rem; cursor: pointer; text-align: center; transition: all 0.2s; background: rgba(255,255,255,0.5); position: relative; }
+  .resa-plage:hover { border-color: #d8b8e8; background: rgba(255,255,255,0.9); }
+  .resa-plage.sel { border-color: #e8c46a; background: rgba(232,196,106,0.08); }
+  .resa-plage.sel::after { content: '✓'; position: absolute; top: 6px; right: 8px; font-size: 11px; color: #e8c46a; }
+  .resa-plage-name { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-style: italic; font-weight: 600; color: #1a0f2e; margin-bottom: 3px; }
+  .resa-plage-hours { font-size: 13.5px; color: #4a1d78; font-weight: 600; }
+
+  .fields-block { display: none; }
+  .fields-block.show { display: block; }
+
+  .resa-input { width: 100%; border: 1px solid rgba(216,184,232,0.6); background: #fff; padding: 0.85rem 1rem; font-family: 'Jost', sans-serif; font-size: 1rem; font-weight: 400; color: #1a0f2e; outline: none; transition: border-color 0.2s; box-sizing: border-box; }
+  .resa-input:focus { border-color: #e8c46a; }
+  .resa-input::placeholder { color: rgba(26,15,46,0.45); }
+
+  .resa-submit { width: 100%; background: linear-gradient(to right, #e8a0c0, #d4a030); border: none; padding: 1.1rem; font-family: 'Jost', sans-serif; font-size: 0.8rem; letter-spacing: 0.25em; text-transform: uppercase; color: #3a1560; cursor: pointer; font-weight: 700; transition: opacity 0.2s; margin-top: 0.5rem; }
+  .resa-submit:hover { opacity: 0.85; }
+  .resa-note { font-size: 14px; color: #4a1d78; font-weight: 500; text-align: center; margin-top: 1.2rem; font-style: italic; }
+
+  .success-msg { display: none; text-align: center; padding: 2rem 1rem; }
+  .success-msg.show { display: block; }
+  .success-msg-title { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-style: italic; font-weight: 600; color: #1a0f2e; margin-bottom: 0.8rem; }
+  .success-msg-text { font-size: 1rem; font-weight: 500; color: #1a0f2e; line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<div class="resa-wrap">
+  <h2 class="resa-title">Réserver une<br/><em>séance</em></h2>
+  <div class="resa-divider"></div>
+
+  <div class="resa-form">
+    <div id="form-content">
+
+      <div class="resa-field">
+        <span class="resa-field-label">Type de séance</span>
+        <div class="resa-options">
+          <div class="resa-option sel" onclick="selOpt(this,'type')" data-value="Individuelle – 2h · 80€">
+            <div class="resa-option-title">Individuelle</div>
+            <div class="resa-option-sub">2h · 80€</div>
+          </div>
+          <div class="resa-option" onclick="selOpt(this,'type')" data-value="Collective – 2h · 50€ · 3–5 pers.">
+            <div class="resa-option-title">Collective</div>
+            <div class="resa-option-sub">2h · 50€ · 3–5 pers.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="resa-field">
+        <span class="resa-field-label">Choisissez une date</span>
+        
+
+        <div class="month-tabs">
+          <div class="month-tab active" onclick="showMonth('juin')">Juin 2026</div>
+          <div class="month-tab" onclick="showMonth('juillet')">Juillet 2026</div>
+        </div>
+
+        <div class="cal-nav">
+            <button class="cal-nav-btn" onclick="navMonth(-1)">‹</button>
+            <span class="cal-month" id="cal-month-label">Juin 2026</span>
+            <button class="cal-nav-btn" onclick="navMonth(1)">›</button>
+          </div>
+        <div class="cal-wrapper">
+          <div class="cal-grid" id="cal-grid"></div>
+          <div class="cal-overlay" id="cal-overlay">
+            <p class="cal-overlay-title">Mon agenda n'est pas encore<br/>mis à jour pour cette période</p>
+            <p class="cal-overlay-sub">Contactez-moi directement pour<br/>réserver votre séance.</p>
+            <a href="tel:+33763192889" class="cal-overlay-link">+33 7 63 19 28 89</a>
+          </div>
+        </div>
+
+        <div class="cal-bandeau" id="cal-bandeau">
+          <p class="cal-bandeau-text">D'autres dates peuvent être disponibles — contactez-moi directement pour les créneaux non encore affichés.</p>
+          <a href="tel:+33763192889" class="cal-bandeau-link">+33 7 63 19 28 89</a>
+        </div>
+
+        <div class="cal-legend">
+          <div class="cal-legend-item"><div class="legend-dot dispo"></div> Disponible</div>
+          <div class="cal-legend-item"><div class="legend-dot indispo"></div> Non disponible</div>
+        </div>
+
+        <div class="plages-block" id="plages-block">
+          <span class="date-selected-label" id="date-label"></span>
+          <span class="resa-field-label" style="margin-bottom:0.5rem;">Préférence horaire</span>
+          <span class="resa-field-hint">Indiquez la plage qui vous convient le mieux — je vous contacte ensuite pour définir ensemble l'heure précise.</span>
+          <div class="resa-plages">
+            <div class="resa-plage" onclick="selOpt(this,'plage')" data-value="Matin (8h–12h)">
+              <div class="resa-plage-name">Matin</div>
+              <div class="resa-plage-hours">8h – 12h</div>
+            </div>
+            <div class="resa-plage" onclick="selOpt(this,'plage')" data-value="Après-midi (13h–18h)">
+              <div class="resa-plage-name">Après-midi</div>
+              <div class="resa-plage-hours">13h – 18h</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fields-block" id="fields-block">
+        <div class="resa-field">
+          <span class="resa-field-label">Votre nom & prénom</span>
+          <input class="resa-input" type="text" id="input-nom" placeholder="Marie Dupont" required />
+        </div>
+        <div class="resa-field">
+          <span class="resa-field-label">Votre numéro de téléphone</span>
+          <input class="resa-input" type="tel" id="input-tel" placeholder="+33 6 00 00 00 00" required />
+        </div>
+        <div class="resa-field" style="margin-bottom:0.5rem;">
+          <span class="resa-field-label">Message (optionnel)</span>
+          <textarea class="resa-input" id="input-msg" rows="3" placeholder="Une intention, une question…" style="resize:none;"></textarea>
+        </div>
+        <div class="resa-field" style="margin-bottom:1rem; margin-top:1rem;">
+          <span class="resa-field-label">Décharge de responsabilité</span>
+          <span class="resa-field-hint">Veuillez lire l'intégralité du document avant de pouvoir valider.</span>
+          <div id="decharge-scroll" onscroll="checkScroll()" style="height:200px; overflow-y:scroll; border:1px solid rgba(216,184,232,0.6); background:rgba(255,255,255,0.5); padding:1.2rem; font-family:'Jost',sans-serif; font-size:0.9rem; font-weight:400; color:#1a0f2e; line-height:1.8;">
+            <p style="font-weight:700; font-size:0.9rem; margin:0 0 1rem; color:#4a1d78; letter-spacing:0.05em;">DÉCHARGE DE RESPONSABILITÉ POUR LA PARTICIPATION À UNE SÉANCE DE YATRA KUNDALINI ACTIVATION</p>
+            <p style="margin:0 0 0.8rem;">Je reconnais avoir été informé(e) des conditions de santé nécessaires pour participer à cette séance et déclare ne pas souffrir des troubles suivants :</p>
+            <p style="margin:0 0 0.4rem; font-weight:400;">Troubles psychiques :</p>
+            <p style="margin:0 0 0.8rem; padding-left:1rem;">pathologies psychiatriques, antécédents de pathologie psychiatrique, bipolarité, schizophrénie, traitement neuroleptique ou antipsychotique.</p>
+            <p style="margin:0 0 0.4rem; font-weight:400;">Troubles physiques :</p>
+            <p style="margin:0 0 0.8rem; padding-left:1rem;">troubles cardio-vasculaires (antécédents d'infarctus, AVC...), hypertension artérielle, épilepsie, glaucome, asthme sévère, intervention chirurgicale récente, grossesse.</p>
+            <p style="margin:0 0 0.8rem;">Je reconnais que la Yatra Kundalini Activation est une pratique puissante pouvant induire des transformations profondes sur le plan physique, émotionnel et énergétique.</p>
+            <p style="margin:0 0 0.8rem;">Je comprends que la Yatra Kundalini Activation (YKA) n'est pas un dispositif médical et ne remplace pas un traitement médical ou psychiatrique.</p>
+            <p style="margin:0 0 0.8rem;">Je déclare avoir pris connaissance du fait que cette séance peut entraîner des réactions variées et que je participe de mon plein gré et sous ma propre responsabilité.</p>
+            <p style="margin:0;">Je m'engage à ne pas consommer d'alcool ou de substances altérant la conscience avant et après la séance.</p>
+          </div>
+          <div style="margin-top:1rem; padding:1rem; background:rgba(232,196,106,0.07); border-left:2px solid #e8c46a;">
+            <label style="display:flex; align-items:flex-start; gap:10px; cursor:pointer; font-family:'Jost',sans-serif; font-size:0.9rem; font-weight:400; color:#1a0f2e; line-height:1.6;">
+              <input type="checkbox" id="input-cgu" onchange="toggleSubmit()" disabled style="margin-top:3px; accent-color:#7a5090; flex-shrink:0; opacity:0.35; cursor:not-allowed;" />
+              <span>J'ai lu et j'accepte la décharge de responsabilité. Je confirme ne présenter aucune contre-indication mentionnée ci-dessus.</span>
+            </label>
+          </div>
+        </div>
+        <button class="resa-submit" id="btn-submit" onclick="submitForm()" disabled style="opacity:0.35; cursor:not-allowed;">Envoyer ma demande de réservation</button>
+        <p class="resa-note">Solenn vous contactera par téléphone pour confirmer l'heure et le lieu exact.</p>
+      </div>
+
+    </div>
+
+    <div class="success-msg" id="success-msg">
+      <p class="success-msg-title">Merci pour votre demande ✨</p>
+      <p class="success-msg-text">Votre demande de réservation a bien été envoyée.<br/>Solenn vous contactera très prochainement par téléphone<br/>pour confirmer l'heure et le lieu de votre séance.</p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const data = {
+    juin:    { label: 'Juin 2026',    year: 2026, month: 5, dispos: ['2026-06-22','2026-06-23','2026-06-24','2026-06-25','2026-06-26'], partial: false },
+    juillet: { label: 'Juillet 2026', year: 2026, month: 6, dispos: [], partial: false }
+  };
+
+  const monthNames = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const jourNames = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  let current = 'juin';
+  let selectedDate = null;
+  let selectedType = 'Individuelle – 2h · 80€';
+  let selectedPlage = null;
+
+  function renderGrid() {
+    const { label, year, month, dispos, partial } = data[current];
+    document.getElementById('cal-month-label').textContent = label;
+    const grid = document.getElementById('cal-grid');
+    const headers = ['Lu','Ma','Me','Je','Ve','Sa','Di'];
+    grid.innerHTML = '';
+    headers.forEach(h => { const d = document.createElement('div'); d.className = 'cal-day-name'; d.textContent = h; grid.appendChild(d); });
+
+    let startDow = new Date(year, month, 1).getDay();
+    startDow = startDow === 0 ? 6 : startDow - 1;
+    for (let i = 0; i < startDow; i++) { const e = document.createElement('div'); e.className = 'cal-day empty'; grid.appendChild(e); }
+
+    const today = new Date(); today.setHours(0,0,0,0);
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    for (let d = 1; d <= daysInMonth; d++) {
+      const date = new Date(year, month, d);
+      const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const div = document.createElement('div');
+      div.textContent = d; div.className = 'cal-day';
+      if (date < today) { div.classList.add('past'); }
+      else if (dispos.includes(dateStr)) {
+        div.classList.add('dispo');
+        if (selectedDate === dateStr) div.classList.add('sel');
+        div.onclick = () => selectDay(dateStr, d, date.getDay());
+      } else { div.classList.add('indispo'); }
+      grid.appendChild(div);
+    }
+
+    document.getElementById('cal-overlay').classList.toggle('show', dispos.length === 0);
+    document.getElementById('cal-bandeau').classList.toggle('show', partial);
+  }
+
+  function selectDay(dateStr, d, dow) {
+    selectedDate = dateStr;
+    const label = jourNames[dow] + ' ' + d + ' ' + monthNames[new Date(dateStr).getMonth()];
+    document.getElementById('date-label').textContent = '→ ' + label;
+    document.getElementById('plages-block').classList.add('show');
+    document.getElementById('fields-block').classList.add('show');
+    renderGrid();
+  }
+
+  const monthOrder = ['juin', 'juillet'];
+  function navMonth(dir) {
+    const idx = monthOrder.indexOf(current);
+    const next = monthOrder[idx + dir];
+    if (next) showMonth(next);
+  }
+
+  function showMonth(m) {
+    current = m;
+    document.querySelectorAll('.month-tab').forEach((t, i) => t.classList.toggle('active', ['juin','juillet'][i] === m));
+    renderGrid();
+  }
+
+  function selOpt(el, group) {
+    el.parentElement.querySelectorAll('.resa-option,.resa-plage').forEach(s => s.classList.remove('sel'));
+    el.classList.add('sel');
+    if (group === 'type') selectedType = el.dataset.value;
+    if (group === 'plage') selectedPlage = el.dataset.value;
+  }
+
+  function toggleSubmit() {
+    const checked = document.getElementById('input-cgu').checked;
+    const btn = document.getElementById('btn-submit');
+    btn.disabled = !checked;
+    btn.style.opacity = checked ? '1' : '0.35';
+    btn.style.cursor = checked ? 'pointer' : 'not-allowed';
+  }
+  function checkScroll() {
+    const el = document.getElementById('decharge-scroll');
+    const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 10;
+    if (atBottom) {
+      const cgu = document.getElementById('input-cgu');
+      cgu.disabled = false;
+      cgu.style.opacity = '1';
+      cgu.style.cursor = 'pointer';
+    }
+  }
+
+  async function submitForm() {
+    const nom = document.getElementById('input-nom').value.trim();
+    const tel = document.getElementById('input-tel').value.trim();
+    const msg = document.getElementById('input-msg').value.trim();
+    const cgu = document.getElementById('input-cgu').checked;
+    if (!nom || !tel || !selectedDate || !selectedPlage) {
+      alert('Merci de remplir tous les champs obligatoires et de sélectionner une date et un créneau.');
+      return;
+    }
+    if (!cgu) { alert("Merci d'accepter les termes et conditions pour continuer."); return; }
+
+    const dateStr = jourNames[new Date(selectedDate).getDay()] + ' ' + new Date(selectedDate).getDate() + ' ' + monthNames[new Date(selectedDate).getMonth()];
+    const body = { nom, telephone: tel, type_seance: selectedType, date: dateStr, creneau: selectedPlage, message: msg || 'Aucun message' };
+
+    try {
+      const res = await fetch('https://formspree.io/f/xgoqdoaq', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (res.ok) {
+        document.getElementById('form-content').style.display = 'none';
+        document.getElementById('success-msg').classList.add('show');
+      } else { alert('Une erreur est survenue. Veuillez réessayer.'); }
+    } catch(e) { alert('Une erreur est survenue. Veuillez réessayer.'); }
+  }
+
+  renderGrid();
+</script>
+
+</body>
+</html>
